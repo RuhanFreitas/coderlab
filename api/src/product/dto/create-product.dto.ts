@@ -19,9 +19,8 @@ export class CreateProductDTO {
     @Type(() => Number)
     price: number
 
-    @IsArray({ message: 'Categories must be an array of IDs' })
+    @IsArray({ message: 'Category IDs must be an array' })
     @ArrayMinSize(1, { message: 'Product must have at least one category' })
     @IsInt({ each: true, message: 'Each category ID must be an integer' })
-    @Type(() => Number)
-    categories: number[]
+    categoryIds: number[]
 }
