@@ -3,7 +3,7 @@ import {
     BadRequestException,
     NotFoundException,
 } from '@nestjs/common'
-import { PrismaService } from 'prisma/prisma.service'
+import { PrismaService } from '../prisma/prisma.service'
 import { CreateCategoryDTO } from './dto/create-category.dto'
 
 @Injectable()
@@ -22,7 +22,7 @@ export class CategoryService {
             include: { children: true, parent: true },
         })
 
-        if (!category) throw new NotFoundException(`Category ${id} not found.`)
+        if (!category) throw new NotFoundException(`Category ${id} not found`)
 
         return category
     }
@@ -35,7 +35,7 @@ export class CategoryService {
 
             if (!parent) {
                 throw new NotFoundException(
-                    `Parent category ${createCategoryDTO.parentId} not found.`,
+                    `Parent category ${createCategoryDTO.parentId} not found`,
                 )
             }
         }
@@ -78,7 +78,7 @@ export class CategoryService {
 
         if (!parent)
             throw new NotFoundException(
-                `Parent category ${newParentId} not found.`,
+                `Parent category ${newParentId} not found`,
             )
 
         let currentParent = parent
@@ -86,7 +86,7 @@ export class CategoryService {
         while (currentParent?.parentId) {
             if (currentParent.parentId === categoryId) {
                 throw new BadRequestException(
-                    'The father cannot be a descendant.',
+                    'The father cannot be a descendant',
                 )
             }
 

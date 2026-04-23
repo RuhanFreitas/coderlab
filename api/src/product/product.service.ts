@@ -3,7 +3,7 @@ import {
     BadRequestException,
     NotFoundException,
 } from '@nestjs/common'
-import { PrismaService } from 'prisma/prisma.service'
+import { PrismaService } from '../prisma/prisma.service'
 import { CreateProductDTO } from './dto/create-product.dto'
 import { UpdateProductDTO } from './dto/update-product.dto'
 
@@ -70,10 +70,38 @@ export class ProductService {
         })
     }
 
-    async findAll() {
-        return this.prisma.product.findMany({
-            include: { categories: true },
-        })
+    async findAll(params: { name?: string; page: number; limit: number }) {
+        const { name, page, limit } = params
+        const skip = (page - 1) * limit
+
+        const where = name
+            ? {
+                  name: {
+                      contains: name,
+                      mode: 'insensitive' as const,
+                  },
+              }
+            : {}
+
+        const [data, total] = await Promise.all([
+            this.prisma.product.findMany({
+                where,
+                skip,
+                take: limit,
+                include: { categories: true },
+                orderBy: { id: 'desc' },
+            }),
+            this.prisma.product.count({ where }),
+        ])
+
+        return {
+            data,
+            meta: {
+                total,
+                page,
+                lastPage: Math.ceil(total / limit),
+            },
+        }
     }
 
     async findOne(id: number) {

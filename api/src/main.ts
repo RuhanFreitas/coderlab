@@ -15,7 +15,7 @@ async function bootstrap() {
     )
 
     const config = new DocumentBuilder()
-        .setTitle('E-commerce API')
+        .setTitle('Coderlab API')
         .setDescription('Documentação das rotas de Categorias e Produtos')
         .setVersion('1.0')
         .build()

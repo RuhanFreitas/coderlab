@@ -7,6 +7,8 @@ import {
     Delete,
     Put,
     ParseIntPipe,
+    Patch,
+    Query,
 } from '@nestjs/common'
 import { ProductService } from './product.service'
 import { CreateProductDTO } from './dto/create-product.dto'
@@ -22,8 +24,16 @@ export class ProductController {
     }
 
     @Get()
-    async findAll() {
-        return this.productService.findAll()
+    async findAll(
+        @Query('name') name?: string,
+        @Query('page') page?: string,
+        @Query('limit') limit?: string,
+    ) {
+        return this.productService.findAll({
+            name,
+            page: page ? Number(page) : 1,
+            limit: limit ? Number(limit) : 10,
+        })
     }
 
     @Get(':id')
@@ -31,7 +41,7 @@ export class ProductController {
         return this.productService.findOne(id)
     }
 
-    @Put(':id')
+    @Patch(':id')
     async update(
         @Param('id', ParseIntPipe) id: number,
         @Body() updateProductDto: UpdateProductDTO,
