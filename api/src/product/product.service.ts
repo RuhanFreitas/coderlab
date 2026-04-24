@@ -43,7 +43,6 @@ export class ProductService {
     async update(id: number, updateProductDTO: UpdateProductDTO) {
         const { categoryIds, ...productData } = updateProductDTO
 
-        await this.findOne(id)
         if (categoryIds && categoryIds.length > 0) {
             const categoriesFound = await this.prisma.category.count({
                 where: { id: { in: categoryIds } },

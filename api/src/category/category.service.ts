@@ -28,18 +28,6 @@ export class CategoryService {
     }
 
     async create(createCategoryDTO: CreateCategoryDTO) {
-        if (createCategoryDTO.parentId) {
-            const parent = await this.prisma.category.findUnique({
-                where: { id: createCategoryDTO.parentId },
-            })
-
-            if (!parent) {
-                throw new NotFoundException(
-                    `Parent category ${createCategoryDTO.parentId} not found`,
-                )
-            }
-        }
-
         return this.prisma.category.create({
             data: {
                 name: createCategoryDTO.name,
@@ -49,8 +37,6 @@ export class CategoryService {
     }
 
     async update(id: number, data: { name?: string; parentId?: number }) {
-        await this.findOne(id)
-
         if (data.parentId) {
             await this.validateHierarchy(id, data.parentId)
         }

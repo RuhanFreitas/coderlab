@@ -36,7 +36,6 @@ describe('CategoryService', () => {
             const categoryId = 1
             const updateDto = { parentId: 1 }
 
-            // Precisamos simular que a categoria existe para não cair no NotFoundException
             ;(prisma.category.findUnique as jest.Mock).mockResolvedValue({
                 id: 1,
                 name: 'Teste',
@@ -51,13 +50,11 @@ describe('CategoryService', () => {
             const categoryId = 1
             const updateDto = { parentId: 2 }
 
-            // 1. Simula que a categoria que está sendo editada existe
             ;(prisma.category.findUnique as jest.Mock)
-                .mockResolvedValueOnce({ id: 1, name: 'Filha' }) // Para o findOne
-                .mockResolvedValueOnce({ id: 2, parentId: 1 }) // Para a validação de hierarquia (o pai já é filho da categoria)
-
+                .mockResolvedValueOnce({ id: 1, name: 'Filha' })
+                .mockResolvedValueOnce({ id: 2, parentId: 1 })
             await expect(service.update(categoryId, updateDto)).rejects.toThrow(
-                'The father cannot be a descendant', // Mudamos para a sua mensagem real
+                'The father cannot be a descendant',
             )
         })
     })

@@ -48,6 +48,7 @@ services:
             - '${FRONTEND_PORT}:5173'
         volumes:
             - ./web:/home/node/app
+            - /home/node/app/node_modules
         depends_on:
             - api
 

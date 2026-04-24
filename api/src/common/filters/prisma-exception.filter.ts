@@ -15,39 +15,55 @@ export class PrismaExceptionFilter implements ExceptionFilter {
     ) {
         const ctx = host.switchToHttp()
         const response = ctx.getResponse<Response>()
+        const request = ctx.getRequest()
 
         let status = HttpStatus.INTERNAL_SERVER_ERROR
         let message = 'Internal server error'
 
         switch (exception.code) {
-            case 'P2002': // @Unique() conflict
+            case 'P2002':
                 status = HttpStatus.CONFLICT
-                message = 'A record with this unique value already exists'
+                const fields =
+                    (exception.meta?.target as string[])?.join(', ') || 'field'
+                message = `Unique constraint failed on ${fields}`
                 break
 
-            case 'P2003': // ParentId doesn't exists
+            case 'P2003':
                 status = HttpStatus.BAD_REQUEST
                 message =
-                    'Foreign key constraint failed. Check if related records exist'
+                    'Foreign key constraint failed. Related record not found or dependency exists.'
                 break
 
-            case 'P2025': // "Record to update not found" ou "Record to delete not found"
+            case 'P2025':
                 status = HttpStatus.NOT_FOUND
-                message = 'The requested record was not found'
+                message = exception.message || 'Record not found'
                 break
 
-            case 'P1001': // DB offline
-                status = HttpStatus.SERVICE_UNAVAILABLE
+            case 'P2000': // Value too long for column
+                status = HttpStatus.BAD_REQUEST
                 message =
-                    'Database is unreachable. Please check the infrastructure'
+                    'The provided value is too long for one of the fields.'
+                break
+
+            case 'P1001':
+            case 'P1008': // Operations timed out
+                status = HttpStatus.SERVICE_UNAVAILABLE
+                message = 'Database is unreachable or timed out.'
+                break
+
+            default:
+                // Logar o erro original no console para debug em desenvolvimento
+                console.error(exception)
+                message = `Unhandled database error: ${exception.code}`
                 break
         }
 
         response.status(status).json({
             statusCode: status,
             message: message,
-            timestamp: new Date().toISOString(), // Boa prática: logar o tempo
-            path: ctx.getRequest().url, // Boa prática: mostrar onde deu erro
+            timestamp: new Date().toISOString(),
+            path: request.url,
+            errorCode: exception.code,
         })
     }
 }
